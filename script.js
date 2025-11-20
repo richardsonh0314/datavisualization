@@ -357,21 +357,20 @@ function show2010s() {
 function updateChart() {
     // Get the current domain
     const [minYear, maxYear] = xScale.domain();
-    const yearRange = maxYear - minYear;
     
-    // Determine appropriate number of ticks based on zoom level
-    const tickCount = yearRange <= 10 ? yearRange + 1 : 10;
+    // Create array of years for ticks (only integers)
+    const tickYears = [];
+    for (let year = Math.ceil(minYear); year <= Math.floor(maxYear); year++) {
+        tickYears.push(year);
+    }
     
-    // Update x-axis with appropriate ticks
+    // Update x-axis with explicit tick values
     g.select(".x-axis")
         .transition()
         .duration(750)
         .call(d3.axisBottom(xScale)
+            .tickValues(tickYears)
             .tickFormat(d3.format("d"))
-            .ticks(tickCount)
-            .tickValues(yearRange <= 10 ? 
-                d3.range(Math.ceil(minYear), Math.floor(maxYear) + 1) : 
-                null)
         );
     
     // Update grid with same tick values
@@ -379,20 +378,20 @@ function updateChart() {
         .transition()
         .duration(750)
         .call(d3.axisBottom(xScale)
-            .ticks(tickCount)
-            .tickValues(yearRange <= 10 ? 
-                d3.range(Math.ceil(minYear), Math.floor(maxYear) + 1) : 
-                null)
+            .tickValues(tickYears)
             .tickSize(-height)
             .tickFormat("")
         );
+    
+    // Filter data to only include years in the current domain
+    const [min, max] = xScale.domain();
     
     // Update lines with filtered data
     g.selectAll(".line")
         .transition()
         .duration(750)
         .attr("d", d => {
-            const filteredValues = d.values.filter(v => v.year >= minYear && v.year <= maxYear);
+            const filteredValues = d.values.filter(v => v.year >= min && v.year <= max);
             return line(filteredValues);
         });
     
@@ -407,7 +406,7 @@ function updateChart() {
         .transition()
         .duration(750)
         .attr("d", d => {
-            const filteredValues = d.values.filter(v => v.year >= minYear && v.year <= maxYear);
+            const filteredValues = d.values.filter(v => v.year >= min && v.year <= max);
             return area(filteredValues);
         });
     
