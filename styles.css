@@ -1,284 +1,39 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Genre Trends Over Time - TMDB Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Movie Genre Trends Over Time</h1>
+        <div class="subtitle">TMDB Dataset Analysis: Film Genre Popularity from 1990 to 2017</div>
+        
+        <div class="controls">
+            <button onclick="resetView()">Reset View</button>
+            <button onclick="animateLines()">Animate</button>
+            <button onclick="showAllYears()">Show All Years</button>
+            <button onclick="show2010s()">2010s Only</button>
+        </div>
+        
+        <div class="chart-container">
+            <svg id="chart"></svg>
+            <div class="tooltip"></div>
+        </div>
+        
+        <div class="legend" id="legend"></div>
+        
+        <div class="info-panel">
+            <h3>About This Visualization</h3>
+            <p>This interactive chart displays the number of movies released per genre each year, based on the TMDB 5000 Movie Dataset. 
+               Click on genre names in the legend to show/hide lines. Hover over the chart to see exact values.</p>
+            <p class="data-note">Data source: TMDB (The Movie Database) via Kaggle</p>
+        </div>
+    </div>
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    padding: 20px;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    padding: 30px;
-}
-
-h1 {
-    text-align: center;
-    color: #2d3748;
-    margin-bottom: 10px;
-    font-size: 2.5em;
-}
-
-.subtitle {
-    text-align: center;
-    color: #718096;
-    margin-bottom: 30px;
-    font-size: 1.1em;
-}
-
-.controls {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-button {
-    background: #667eea;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    margin: 0 5px;
-    transition: all 0.3s ease;
-}
-
-button:hover {
-    background: #5a67d8;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-button:active {
-    transform: translateY(0);
-}
-
-.chart-container {
-    position: relative;
-    width: 100%;
-    margin-bottom: 20px;
-}
-
-#chart {
-    width: 100%;
-    height: 500px;
-}
-
-.line {
-    fill: none;
-    stroke-width: 3;
-    transition: all 0.3s ease;
-}
-
-.line:hover {
-    stroke-width: 5;
-}
-
-.line.dimmed {
-    opacity: 0.1;
-    stroke-width: 1;
-}
-
-.line.highlighted {
-    stroke-width: 4;
-}
-
-.axis {
-    font-size: 12px;
-}
-
-.axis path,
-.axis line {
-    stroke: #cbd5e0;
-}
-
-.axis text {
-    fill: #4a5568;
-}
-
-.axis-label {
-    font-size: 14px;
-    font-weight: 600;
-    fill: #2d3748;
-}
-
-.grid line {
-    stroke: #e2e8f0;
-    stroke-opacity: 0.5;
-    shape-rendering: crispEdges;
-}
-
-.grid path {
-    stroke-width: 0;
-}
-
-.tooltip {
-    position: absolute;
-    text-align: left;
-    padding: 12px;
-    font-size: 13px;
-    background: rgba(0, 0, 0, 0.95);
-    color: white;
-    border-radius: 8px;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 1000;
-}
-
-.tooltip strong {
-    color: #ffd700;
-    font-size: 14px;
-}
-
-.legend {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin: 20px 0;
-    gap: 12px;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    padding: 6px 12px;
-    border-radius: 20px;
-    transition: all 0.3s ease;
-    background: #f7fafc;
-    border: 2px solid transparent;
-}
-
-.legend-item:hover {
-    background-color: #edf2f7;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.legend-item.active {
-    border-color: #667eea;
-}
-
-.legend-item.dimmed {
-    opacity: 0.3;
-    background: #e2e8f0;
-}
-
-.legend-color {
-    width: 24px;
-    height: 3px;
-    margin-right: 8px;
-    border-radius: 2px;
-}
-
-.legend-text {
-    font-size: 14px;
-    color: #4a5568;
-    font-weight: 500;
-}
-
-.dot {
-    fill: white;
-    stroke-width: 2;
-    opacity: 0;
-    transition: opacity 0.3s;
-    cursor: pointer;
-}
-
-.dot:hover {
-    opacity: 1 !important;
-    r: 7;
-}
-
-.info-panel {
-    margin-top: 30px;
-    padding: 20px;
-    background: #f7fafc;
-    border-radius: 12px;
-    border-left: 4px solid #667eea;
-}
-
-.info-panel h3 {
-    color: #2d3748;
-    margin-bottom: 10px;
-    font-size: 1.2em;
-}
-
-.info-panel p {
-    color: #4a5568;
-    line-height: 1.6;
-    margin-bottom: 8px;
-}
-
-.data-note {
-    font-size: 0.9em;
-    font-style: italic;
-    color: #718096;
-    margin-top: 10px;
-}
-
-/* Loading spinner */
-.loading {
-    text-align: center;
-    padding: 50px;
-    color: #718096;
-}
-
-.loading::after {
-    content: "Loading data...";
-    display: block;
-    margin-top: 20px;
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-    .container {
-        padding: 20px;
-        border-radius: 10px;
-    }
-    
-    h1 {
-        font-size: 1.8em;
-    }
-    
-    .controls {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 8px;
-    }
-    
-    button {
-        padding: 8px 15px;
-        font-size: 13px;
-    }
-    
-    #chart {
-        height: 400px;
-    }
-    
-    .legend {
-        gap: 8px;
-    }
-    
-    .legend-item {
-        padding: 4px 8px;
-        font-size: 12px;
-    }
-}
+    <script src="script.js"></script>
+</body>
+</html>
