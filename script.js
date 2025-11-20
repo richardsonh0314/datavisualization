@@ -355,24 +355,37 @@ function show2010s() {
 }
 
 function updateChart() {
-    // Update x-axis
+    // Get the current domain
+    const [minYear, maxYear] = xScale.domain();
+    const yearRange = maxYear - minYear;
+    
+    // Determine appropriate number of ticks based on zoom level
+    const tickCount = yearRange <= 10 ? yearRange + 1 : 10;
+    
+    // Update x-axis with appropriate ticks
     g.select(".x-axis")
         .transition()
         .duration(750)
-        .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+        .call(d3.axisBottom(xScale)
+            .tickFormat(d3.format("d"))
+            .ticks(tickCount)
+            .tickValues(yearRange <= 10 ? 
+                d3.range(Math.ceil(minYear), Math.floor(maxYear) + 1) : 
+                null)
+        );
     
-    // Update grid
+    // Update grid with same tick values
     g.select(".grid")
         .transition()
         .duration(750)
         .call(d3.axisBottom(xScale)
-            .ticks(10)
+            .ticks(tickCount)
+            .tickValues(yearRange <= 10 ? 
+                d3.range(Math.ceil(minYear), Math.floor(maxYear) + 1) : 
+                null)
             .tickSize(-height)
             .tickFormat("")
         );
-    
-    // Filter data to only include years in the current domain
-    const [minYear, maxYear] = xScale.domain();
     
     // Update lines with filtered data
     g.selectAll(".line")
