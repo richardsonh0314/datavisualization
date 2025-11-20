@@ -1,39 +1,291 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Genre Trends Over Time - TMDB Analysis</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Movie Genre Trends Over Time</h1>
-        <div class="subtitle">TMDB Dataset Analysis: Film Genre Popularity from 1990 to 2017</div>
-        
-        <div class="controls">
-            <button onclick="resetView()">Reset View</button>
-            <button onclick="animateLines()">Animate</button>
-            <button onclick="showAllYears()">Show All Years</button>
-            <button onclick="show2010s()">2010s Only</button>
-        </div>
-        
-        <div class="chart-container">
-            <svg id="chart"></svg>
-            <div class="tooltip"></div>
-        </div>
-        
-        <div class="legend" id="legend"></div>
-        
-        <div class="info-panel">
-            <h3>About This Visualization</h3>
-            <p>This interactive chart displays the number of movies released per genre each year, based on the TMDB 5000 Movie Dataset. 
-               Click on genre names in the legend to show/hide lines. Hover over the chart to see exact values.</p>
-            <p class="data-note">Data source: TMDB (The Movie Database) via Kaggle</p>
-        </div>
-    </div>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-    <script src="script.js"></script>
-</body>
-</html>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #f5f7fa;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    padding: 40px;
+}
+
+h1 {
+    color: #2c3e50;
+    margin-bottom: 8px;
+    font-size: 2em;
+    font-weight: 600;
+}
+
+.subtitle {
+    color: #6c757d;
+    margin-bottom: 30px;
+    font-size: 1em;
+}
+
+.controls {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+button {
+    background: white;
+    color: #495057;
+    border: 1px solid #dee2e6;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 10px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+button:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+    color: #212529;
+}
+
+button:active {
+    background: #e9ecef;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 25px;
+}
+
+#chart {
+    width: 100%;
+    height: 500px;
+}
+
+.line {
+    fill: none;
+    stroke-width: 2.5;
+    transition: all 0.3s ease;
+}
+
+.line:hover {
+    stroke-width: 3.5;
+}
+
+.line.dimmed {
+    opacity: 0.15;
+    stroke-width: 1.5;
+}
+
+.axis {
+    font-size: 12px;
+}
+
+.axis path,
+.axis line {
+    stroke: #dee2e6;
+}
+
+.axis text {
+    fill: #6c757d;
+    font-weight: 400;
+}
+
+.axis-label {
+    font-size: 13px;
+    font-weight: 500;
+    fill: #495057;
+}
+
+.grid line {
+    stroke: #f0f0f0;
+    stroke-opacity: 1;
+    shape-rendering: crispEdges;
+}
+
+.grid path {
+    stroke-width: 0;
+}
+
+.tooltip {
+    position: absolute;
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 12px;
+    background: white;
+    color: #212529;
+    border-radius: 4px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border: 1px solid #dee2e6;
+    z-index: 1000;
+}
+
+.tooltip strong {
+    color: #212529;
+    font-size: 13px;
+    display: block;
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.legend {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    margin: 20px 0;
+    gap: 10px;
+    padding: 15px 0;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    background: white;
+    border: 1px solid #e9ecef;
+}
+
+.legend-item:hover {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.legend-item.active {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+.legend-item.dimmed {
+    opacity: 0.4;
+    background: #fafafa;
+}
+
+.legend-color {
+    width: 18px;
+    height: 2px;
+    margin-right: 8px;
+    border-radius: 1px;
+}
+
+.legend-text {
+    font-size: 13px;
+    color: #495057;
+    font-weight: 400;
+}
+
+.dot {
+    fill: white;
+    stroke-width: 2;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.info-panel {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    border-left: 3px solid #495057;
+}
+
+.info-panel h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.info-panel p {
+    color: #6c757d;
+    line-height: 1.6;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.data-note {
+    font-size: 0.85em;
+    color: #868e96;
+    margin-top: 10px;
+}
+
+/* Area fills - more subtle */
+.area {
+    opacity: 0.08;
+}
+
+/* Mouse line - more subtle */
+.mouse-line {
+    stroke: #adb5bd !important;
+    stroke-dasharray: 3, 3;
+}
+
+/* Loading state */
+.loading {
+    text-align: center;
+    padding: 50px;
+    color: #6c757d;
+}
+
+.loading::after {
+    content: "Loading data...";
+    display: block;
+    margin-top: 20px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 25px;
+        border-radius: 0;
+    }
+    
+    h1 {
+        font-size: 1.6em;
+    }
+    
+    .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    button {
+        padding: 7px 14px;
+        font-size: 13px;
+        margin-right: 0;
+    }
+    
+    #chart {
+        height: 400px;
+    }
+    
+    .legend {
+        gap: 6px;
+    }
+    
+    .legend-item {
+        padding: 4px 8px;
+    }
+    
+    .legend-text {
+        font-size: 12px;
+    }
+}
