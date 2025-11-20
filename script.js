@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(function(error) {
             console.error('Failed to load genre_trends_data.json:', error);
-            // Display error message in chart container
+            // Display error message
             const container = document.querySelector('.chart-container');
             if (container) {
                 container.innerHTML = '<div style="text-align: center; padding: 50px; color: #721c24; background: #f8d7da; border-radius: 4px; margin: 20px;"><strong>Error Loading Data</strong><br>Could not load genre_trends_data.json<br>Please run: python prepare_data.py</div>';
