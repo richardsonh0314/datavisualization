@@ -1,1 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Genre Trends Over Time - TMDB Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Movie Genre Trends Over Time</h1>
+        <div class="subtitle">Analysis of TMDB Dataset: Tracking Film Genre Popularity from 1990 to 2017</div>
+        
+        <div class="controls">
+            <button onclick="resetView()">Reset View</button>
+            <button onclick="animateLines()">Animate</button>
+            <button onclick="showAllYears()">Show All Years</button>
+            <button onclick="show2000s()">2000s Only</button>
+            <button onclick="show2010s()">2010s Only</button>
+        </div>
+        
+        <div class="chart-container">
+            <svg id="chart"></svg>
+            <div class="tooltip"></div>
+        </div>
+        
+        <div class="legend" id="legend"></div>
+        
+        <div class="info-panel">
+            <h3>About This Visualization</h3>
+            <p>This interactive chart displays the number of movies released per genre each year, based on the TMDB 5000 Movie Dataset. 
+               Click on genre names in the legend to show/hide lines. Hover over the chart to see exact values.</p>
+            <p class="data-note">Data source: TMDB (The Movie Database) via Kaggle</p>
+        </div>
+    </div>
 
+    <script src="script.js"></script>
+</body>
+</html>
