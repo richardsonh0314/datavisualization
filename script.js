@@ -8,13 +8,21 @@ let selectedGenres = new Set();
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing chart...');
     
-    // Try to load the actual data file, fall back to sample data if not available
+    // Load the data file
     d3.json('genre_trends_data.json')
         .then(function(data) {
             console.log('Data loaded successfully:', data);
             currentData = data;
             initializeChart(data);
         })
+        .catch(function(error) {
+            console.error('Failed to load genre_trends_data.json:', error);
+            // Display error message in chart container
+            const container = document.querySelector('.chart-container');
+            if (container) {
+                container.innerHTML = '<div style="text-align: center; padding: 50px; color: #721c24; background: #f8d7da; border-radius: 4px; margin: 20px;"><strong>Error Loading Data</strong><br>Could not load genre_trends_data.json<br>Please run: python prepare_data.py</div>';
+            }
+        });
 });
 
 function initializeChart(data) {
