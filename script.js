@@ -410,13 +410,19 @@ function updateChart() {
             .tickFormat("")
         );
     
-    // Update lines
+    // Filter data to only include years in the current domain
+    const [minYear, maxYear] = xScale.domain();
+    
+    // Update lines with filtered data
     g.selectAll(".line")
         .transition()
         .duration(750)
-        .attr("d", d => line(d.values));
+        .attr("d", d => {
+            const filteredValues = d.values.filter(v => v.year >= minYear && v.year <= maxYear);
+            return line(filteredValues);
+        });
     
-    // Update areas
+    // Update areas with filtered data
     const area = d3.area()
         .x(d => xScale(d.year))
         .y0(height)
@@ -426,5 +432,11 @@ function updateChart() {
     g.selectAll(".area")
         .transition()
         .duration(750)
-        .attr("d", d => area(d.values));
+        .attr("d", d => {
+            const filteredValues = d.values.filter(v => v.year >= minYear && v.year <= maxYear);
+            return area(filteredValues);
+        });
+    
+    // Bring lines to front to ensure they're visible
+    g.selectAll(".genre-line").raise();
 }
